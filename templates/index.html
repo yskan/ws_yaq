@@ -5,6 +5,8 @@
     }
 </style>
 
+<p>Your Username: <span id="username"></span></p>
+<p>Conencted Usernames: <span id="connected_usernames"></span></p>
 <p>Number of clicks: <span id="num"></span></p>
 <button id="click">Click me</button>
 
@@ -23,6 +25,7 @@
 
 <script>
     let ws
+    let username
 
     async function websocket(url) {
         ws = new WebSocket(url)
@@ -34,6 +37,9 @@
         ws.addEventListener("open", () => {
             console.log('Opened websocket')
             updateCount(0)
+            username = Math.random().toString(36).substring(7);
+            setMyUsername(username)
+            ws.send(JSON.stringify({ event_type: "register_username", username }))
         })
 
         ws.addEventListener("message", ({ data }) => {
@@ -46,11 +52,15 @@
                 setErrorMessage()
                 updateCount(count)
             }
+
+            if (data.event_type == "new_client") {
+                document.querySelector("#connected_usernames").innerText += data.username + " "
+            }
         })
 
         ws.addEventListener("close", () => {
             console.log('Closed websocket')
-
+            ws.send(JSON.stringify({ event_type: "delete_me", username }))
             const list = document.querySelector("#events")
             list.innerText = ""
             updateCount(0)
@@ -66,6 +76,10 @@
     document.querySelector("#click").addEventListener("click", () => {
         ws.send(JSON.stringify({ event_type: "click" }))
     })
+
+    const setMyUsername = (username) => {
+        document.querySelector("#username").innerText = username
+    }
 
     const updateCount = (count) => {
         document.querySelector("#num").innerText = count
