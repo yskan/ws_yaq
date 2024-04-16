@@ -64,7 +64,7 @@
     websocket(url)
 
     document.querySelector("#click").addEventListener("click", () => {
-        ws.send("CLICK")
+        ws.send(JSON.stringify({ event_type: "click" }))
     })
 
     const updateCount = (count) => {
@@ -81,7 +81,7 @@
     const closeConnection = () => ws.close()
 
     document.querySelector("#close").addEventListener("click", closeConnection)
-    document.querySelector("#unknown").addEventListener("click", () => ws.send("HUH"))
+    document.querySelector("#unknown").addEventListener("click", () => ws.send(JSON.stringify({ event_type: "bullshit" })))
 
     const setErrorMessage = message => {
         document.querySelector("#error").innerHTML = message ? message : ""
